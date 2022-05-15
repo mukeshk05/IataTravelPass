@@ -15,6 +15,7 @@ class LoadingScreen extends React.Component {
   }
 
   checkIfLogedIn = () => {
+    console.log(user);
     onAuthStateChanged(auth, (user) => {
       if (user) {
         //navigate user

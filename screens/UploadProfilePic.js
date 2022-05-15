@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import { compose } from "redux";
 
 import * as ImageHelpers from "../helpers/ImageHelpers";
 
-class UploadProfilePic extends Component {
+class UploadProfilePic extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -42,7 +42,6 @@ class UploadProfilePic extends Component {
   };
 
   uploadImage = async (image) => {
-    console.log(this.props.route.params.user.uid);
     const storageRef = ref(
       firebaseStorage,
       "profile/" + this.props.route.params.user.uid
@@ -131,6 +130,14 @@ class UploadProfilePic extends Component {
       });
   };
 
+  goToHomeScreen() {
+    const userData = this.props.route.params.user;
+    console.log(userData);
+    this.props.navigation.navigate("HomeDrawer", {
+      user: userData,
+    });
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -162,12 +169,7 @@ class UploadProfilePic extends Component {
                   marginTop: 300,
                   marginLeft: 120,
                 }}
-                onPress={() =>
-                  this.props.navigation.navigate("HomeScreen", {
-                    user: this.props.route.params.user,
-                    profileImage: this.state.image,
-                  })
-                }
+                onPress={() => this.goToHomeScreen()}
               >
                 <Text style={{ color: "white" }}>Do you want to Continue</Text>
               </TouchableOpacity>

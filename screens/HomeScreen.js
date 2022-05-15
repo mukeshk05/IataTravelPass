@@ -18,6 +18,7 @@ class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      user: null,
       data: [
         {
           id: 1,
@@ -48,8 +49,14 @@ class HomeScreen extends React.Component {
     };
   }
 
+  componentDidMount = () => {
+    const result = this.props.navigation.getParam("user");
+    console.log(user);
+    this.setState({ user: result });
+  };
   clickEventListener(item) {
-    console.log(this.state);
+    console.log(this.props.route);
+
     if (item.id == 1) {
       this.props.navigation.navigate("FlightScreen");
     }

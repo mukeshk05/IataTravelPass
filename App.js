@@ -110,7 +110,7 @@ const StackNavigator = () => {
           }}
         />
         <RootStack.Screen
-          name="HomeScreen"
+          name="HomeDrawer"
           component={HomeDrawer}
           options={{
             headerShown: false,
