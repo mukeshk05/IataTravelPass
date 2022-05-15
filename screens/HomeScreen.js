@@ -49,6 +49,7 @@ class HomeScreen extends React.Component {
   }
 
   clickEventListener(item) {
+    console.log(this.state);
     if (item.id == 1) {
       this.props.navigation.navigate("FlightScreen");
     }

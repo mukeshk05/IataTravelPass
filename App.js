@@ -21,7 +21,9 @@ const Drawer = createDrawerNavigator();
 import colors from "./assets/colors";
 import BiometricAuthScreen from "./screens/BiometricAuthScreen";
 import LoadingScreen from "./screens/LoadingScreen";
+import UploadProfilePic from "./screens/UploadProfilePic";
 import "react-native-gesture-handler";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 class App extends React.Component {
   constructor() {
@@ -29,7 +31,11 @@ class App extends React.Component {
   }
 
   render() {
-    return <StackNavigator></StackNavigator>;
+    return (
+      <ActionSheetProvider>
+        <StackNavigator></StackNavigator>
+      </ActionSheetProvider>
+    );
   }
 }
 
@@ -83,6 +89,17 @@ const StackNavigator = () => {
             headerTitleAlign: "center",
           }}
         />
+
+        <RootStack.Screen
+          name="UploadProfilePic"
+          component={UploadProfilePic}
+          options={{
+            title: "Profile Pic",
+            headerShown: false,
+            headerTitleAlign: "center",
+          }}
+        />
+
         <RootStack.Screen
           name="Loading"
           component={LoadingScreen}

@@ -18,7 +18,6 @@ class LoadingScreen extends React.Component {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         //navigate user
-        console.log("Hello -->>>>>>>>>" + user);
         this.props.navigation.navigate("HomeScreen", { user: user });
       } else {
         this.props.navigation.navigate("Landing");

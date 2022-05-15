@@ -7,6 +7,7 @@ import {
   TextInput,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -16,7 +17,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { auth } from "../config/Config";
+import { auth, firebaseDatabase } from "../config/Config";
+import { ref, set } from "firebase/database";
+import { user } from "firebase-functions/v1/auth";
 
 class WelcomeScreen extends React.Component {
   constructor(props) {
@@ -62,10 +65,15 @@ class WelcomeScreen extends React.Component {
       )
         .then((userCredential) => {
           // Signed in
-          console.log(user);
-          const user = userCredential.user;
-          console.log(user);
+          const userData = userCredential.user;
+          set(ref(firebaseDatabase, "user/" + userData.uid), {
+            email: userData.email,
+            uid: userData.uid,
+          });
           this.setState({ isLoading: false });
+
+          this.confirmNextScreen(userData);
+
           // this.props.navigation.navigate("Loading");
           // ...
         })
@@ -91,6 +99,27 @@ class WelcomeScreen extends React.Component {
     } else {
       alert("Please enter email and passowrd");
     }
+  };
+
+  confirmNextScreen = (userData) => {
+    Alert.alert("Profile Pic", "Do You Want to Upload Profile Pic", [
+      {
+        text: "Ask me later",
+        onPress: () => this.props.navigation.navigate("Loading"),
+      },
+      {
+        text: "Cancel",
+        onPress: () => this.props.navigation.navigate("Loading"),
+        style: "cancel",
+      },
+      {
+        text: "OK",
+        onPress: () =>
+          this.props.navigation.navigate("UploadProfilePic", {
+            user: userData,
+          }),
+      },
+    ]);
   };
 
   render() {
