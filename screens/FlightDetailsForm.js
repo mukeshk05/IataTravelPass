@@ -143,7 +143,7 @@ const FlightDetailsForm = () => {
               flex: 1,
               flexDirection: "row",
               margin: 1,
-              marginTop: -610,
+              marginTop: -490,
             }}
           >
             <Text style={{ fontSize: 24, fontWeight: "bold" }}>Arrival</Text>
@@ -190,7 +190,7 @@ const FlightDetailsForm = () => {
               color: "white",
               justifyContent: "center",
               alignContent: "center",
-              marginTop: -600,
+              marginTop: -400,
             }}
           >
             Add

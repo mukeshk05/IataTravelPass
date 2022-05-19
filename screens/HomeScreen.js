@@ -8,17 +8,22 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+import { ref, getDownloadURL, uploadBytes, uploadTask } from "firebase/storage";
+import { firebaseStorage, firebaseDatabase } from "../config/Config";
 const PrivacyImage = require("../assets/privacy.png");
 const DocumentImage = require("../assets/documents.png");
 const FlightImage = require("../assets/flight.png");
 const LabImage = require("../assets/labProof.png");
 const TravelRuleImage = require("../assets/travelUpdate.png");
+const defaultProfileIMage = require("../assets/avatar.png");
+import { connect } from "react-redux";
+import { compose } from "redux";
 
 class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: null,
+      profileImage: null,
       data: [
         {
           id: 1,
@@ -49,14 +54,51 @@ class HomeScreen extends React.Component {
     };
   }
 
-  componentDidMount = () => {
-    const result = this.props.navigation.getParam("user");
-    console.log(user);
-    this.setState({ user: result });
-  };
-  clickEventListener(item) {
-    console.log(this.props.route);
+  readUserData = () => {};
 
+  readProfilePic = () => {
+    const storageRef = ref(
+      firebaseStorage,
+      "profile/" + this.props.route.params.user.uid
+    );
+    getDownloadURL(storageRef)
+      .then((url) => {
+        this.setState({
+          profileImage: url,
+        });
+      })
+      .catch((error) => {
+        // A full list of error codes is available at
+        // https://firebase.google.com/docs/storage/web/handle-errors
+        switch (error.code) {
+          case "storage/object-not-found":
+            // File doesn't exist
+            break;
+          case "storage/unauthorized":
+            // User doesn't have permission to access the object
+            break;
+          case "storage/canceled":
+            // User canceled the upload
+            break;
+
+          // ...
+
+          case "storage/unknown":
+            // Unknown error occurred, inspect the server response
+            break;
+        }
+      });
+  };
+
+  componentDidMount = () => {
+    if (!this.props.profilePic) {
+      this.setState({
+        profileImage: "https://bootdey.com/img/Content/avatar/avatar6.png",
+      });
+    }
+  };
+
+  clickEventListener(item) {
     if (item.id == 1) {
       this.props.navigation.navigate("FlightScreen");
     }
@@ -77,8 +119,11 @@ class HomeScreen extends React.Component {
       <View style={styles.container}>
         <Image
           style={styles.avatar}
-          source={{ uri: "https://bootdey.com/img/Content/avatar/avatar6.png" }}
+          source={{
+            uri: this.state.profileImage,
+          }}
         />
+
         <Text style={styles.name}>Jhon Smith</Text>
 
         <View style={styles.bodyContent}>
@@ -210,4 +255,20 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+const mapStateToProps = (state) => {
+  return {
+    currentUser: state.auth.currentUser,
+    profilePic: state.auth.profilePic,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    toggleIsLoadingProfilePic: (bool) =>
+      dispatch({ type: "TOGGLE_IS_LOADING_PROFILE_PIC", payload: bool }),
+  };
+};
+
+const wrapper = compose(connect(mapStateToProps, mapDispatchToProps));
+
+export default wrapper(HomeScreen);

@@ -24,6 +24,8 @@ import LoadingScreen from "./screens/LoadingScreen";
 import UploadProfilePic from "./screens/UploadProfilePic";
 import "react-native-gesture-handler";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { Provider } from "react-redux";
+import store from "./redux/store";
 
 class App extends React.Component {
   constructor() {
@@ -32,9 +34,11 @@ class App extends React.Component {
 
   render() {
     return (
-      <ActionSheetProvider>
-        <StackNavigator></StackNavigator>
-      </ActionSheetProvider>
+      <Provider store={store}>
+        <ActionSheetProvider>
+          <StackNavigator></StackNavigator>
+        </ActionSheetProvider>
+      </Provider>
     );
   }
 }

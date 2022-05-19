@@ -15,11 +15,10 @@ class LoadingScreen extends React.Component {
   }
 
   checkIfLogedIn = () => {
-    console.log(user);
     onAuthStateChanged(auth, (user) => {
       if (user) {
         //navigate user
-        this.props.navigation.navigate("HomeScreen", { user: user });
+        this.props.navigation.navigate("HomeDrawer");
       } else {
         this.props.navigation.navigate("Landing");
       }

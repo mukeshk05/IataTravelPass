@@ -1,20 +1,16 @@
-import React from "react";
+import * as React from "react";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 import { View, Button, StyleSheet, TouchableOpacity, Text } from "react-native";
 import colors from "../assets/colors";
 
 import * as ImageHelpers from "../helpers/ImageHelpers";
 import { firebaseStorage, firebaseDatabase } from "../config/Config";
 import { ref, uploadBytes } from "firebase/storage";
-import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { useActionSheet } from "@expo/react-native-action-sheet";
+//import { ref, set } from "firebase/database";
 
-class ActionButton extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
-  openSheet = () => {
+export default function ActionButton(props) {
+  const { showActionSheetWithOptions } = useActionSheet();
+  const openSheet = () => {
     const options = ["Select From Photos", "Camera", "Cancel"];
     const cancelButtonIndex = 2; //Element number 2 in the array will be the 'Cancel' button
 
@@ -49,14 +45,18 @@ class ActionButton extends React.Component {
       } catch (error) {
         console.log(error);
       }
-      //this.props.navigation.navigate("UploadProfilePic");
+      this.props.navigation.navigate("UploadProfilePic");
     };
 
-    useActionSheet(
+    showActionSheetWithOptions(
       {
         options,
         cancelButtonIndex,
         showSeparators: true,
+        containerStyle: styles.container,
+        textStyle: styles.text,
+        messageTextStyle: styles.message,
+        titleTextStyle: styles.title,
       },
       (buttonIndex) => {
         // Do something here depending on the button index selected
@@ -75,31 +75,43 @@ class ActionButton extends React.Component {
       }
     );
   };
-
-  render() {
-    return (
-      <View>
-        <TouchableOpacity
-          style={{
-            position: "absolute",
-            bottom: 20,
-            right: 20,
-            width: 50,
-            height: 50,
-            borderRadius: 25,
-            backgroundColor: "green",
-            alignContent: "center",
-            justifyContent: "center",
-          }}
-          onPress={() => this.openSheet()}
-        >
-          <Text style={{ color: "white", fontSize: 30, marginLeft: 17 }}>
-            +
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  return (
+    <View>
+      <TouchableOpacity
+        style={{
+          position: "absolute",
+          bottom: 20,
+          right: 20,
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          backgroundColor: "green",
+          alignContent: "center",
+          justifyContent: "center",
+        }}
+        onPress={() => openSheet()}
+      >
+        <Text style={{ color: "white", fontSize: 30, marginLeft: 17 }}>+</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
-
-export default ActionButton;
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 20,
+    backgroundColor: colors.bgTextInput,
+  },
+  message: {
+    backgroundColor: "purple",
+    color: "white",
+  },
+  title: {
+    backgroundColor: "yellow",
+  },
+  text: {
+    paddingLeft: "40%",
+    alignContent: "center",
+    justifyContent: "center",
+    color: colors.bgUnread,
+  },
+});

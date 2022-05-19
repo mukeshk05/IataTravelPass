@@ -20,7 +20,7 @@ import {
 import { auth, firebaseDatabase } from "../config/Config";
 import { ref, set } from "firebase/database";
 import { user } from "firebase-functions/v1/auth";
-
+import { connect } from "react-redux";
 class WelcomeScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -36,9 +36,8 @@ class WelcomeScreen extends React.Component {
       this.setState({ isLoading: true });
       signInWithEmailAndPassword(auth, this.state.email, this.state.password)
         .then((userCredential) => {
-          // Signed in
-          const user = userCredential.user;
           this.setState({ isLoading: false });
+          this.props.signIn(userCredential);
           this.props.navigation.navigate("Loading");
           // ...
         })
@@ -114,10 +113,12 @@ class WelcomeScreen extends React.Component {
       },
       {
         text: "OK",
-        onPress: () =>
+        onPress: () => {
+          this.props.signIn(userData);
           this.props.navigation.navigate("UploadProfilePic", {
             user: userData,
-          }),
+          });
+        },
       },
     ]);
   };
@@ -299,4 +300,9 @@ const Styles = StyleSheet.create({
   },
 });
 
-export default WelcomeScreen;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    signIn: (user) => dispatch({ type: "SIGN_IN", payload: user }),
+  };
+};
+export default connect(null, mapDispatchToProps)(WelcomeScreen);

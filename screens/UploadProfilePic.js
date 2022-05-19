@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import colors from "../assets/colors";
 import ActionButton from "./ActionButton";
@@ -15,6 +16,7 @@ import { firebaseStorage, firebaseDatabase } from "../config/Config";
 import { ref, getDownloadURL, uploadBytes, uploadTask } from "firebase/storage";
 import { connectActionSheet } from "@expo/react-native-action-sheet";
 import { compose } from "redux";
+import { connect } from "react-redux";
 
 import * as ImageHelpers from "../helpers/ImageHelpers";
 
@@ -23,6 +25,7 @@ class UploadProfilePic extends React.Component {
     super(props);
     this.state = {
       image: null,
+      isLoading: false,
     };
   }
 
@@ -31,6 +34,7 @@ class UploadProfilePic extends React.Component {
   }
 
   openImageLibrary = async () => {
+    this.setState({ isLoading: true });
     const result = await ImageHelpers.openImageLibrary();
     if (result) {
       const downloadUrl = await this.uploadImage(result);
@@ -49,17 +53,18 @@ class UploadProfilePic extends React.Component {
     try {
       const blob = await ImageHelpers.prepareBlob(image.uri);
       uploadBytes(storageRef, blob).then((snapshot) => {
-        console.log("Uploaded a blob or file!" + snapshot);
         getDownloadURL(snapshot.ref).then((downloadURL) => {
-          console.log("File available at", downloadURL);
           this.setState({
             image: downloadURL,
           });
+          this.props.uploadProfileImage(downloadURL);
         });
       });
       blob.close();
+      this.setState({ isLoading: false });
     } catch (error) {
       console.log(error);
+      this.setState({ isLoading: false });
     }
     //this.props.navigation.navigate("UploadProfilePic");
   };
@@ -103,6 +108,7 @@ class UploadProfilePic extends React.Component {
     );
     getDownloadURL(storageRef)
       .then((url) => {
+        this.props.uploadProfileImage(url);
         this.setState({
           image: url,
         });
@@ -131,8 +137,7 @@ class UploadProfilePic extends React.Component {
   };
 
   goToHomeScreen() {
-    const userData = this.props.route.params.user;
-    console.log(userData);
+    const userData = this.props;
     this.props.navigation.navigate("HomeDrawer", {
       user: userData,
     });
@@ -153,6 +158,24 @@ class UploadProfilePic extends React.Component {
         >
           <Text>Documents</Text>
         </View>
+        {this.state.isLoading ? (
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
+                elevation: 1000,
+              },
+            ]}
+          >
+            <ActivityIndicator
+              size="large"
+              color={colors.logoColor}
+            ></ActivityIndicator>
+          </View>
+        ) : null}
         <View
           style={{
             borderBottomWidth: 0.6,
@@ -202,10 +225,24 @@ class UploadProfilePic extends React.Component {
   }
 }
 
-const wrapper = compose(connectActionSheet);
+const mapStateToProps = (state) => {
+  return {
+    profilePic: state.auth.profilePic,
+    currentUser: state.auth.currentUser,
+  };
+};
 
-export default wrapper(UploadProfilePic);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    uploadProfileImage: (profilePic) =>
+      dispatch({ type: "UPLOAD_PROFILE_IMAGE", payload: profilePic }),
+  };
+};
 
+export default compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  connectActionSheet
+)(UploadProfilePic);
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.bgMain,
