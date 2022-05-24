@@ -26,6 +26,8 @@ import "react-native-gesture-handler";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { Provider } from "react-redux";
 import store from "./redux/store";
+import TravelUpdateScreen from "./screens/TravelUpdateScreen";
+import UserProfileCreation from "./screens/UserProfileCReaton";
 
 class App extends React.Component {
   constructor() {
@@ -73,7 +75,16 @@ const HomeDrawer = () => {
           ),
         }}
       />
-      <Drawer.Screen name="Password Forget" component={PasswordForgetScreen} />
+      <Drawer.Screen
+        name="Password Forget"
+        component={PasswordForgetScreen}
+        options={{
+          headerShown: false,
+          drawerIcon: () => (
+            <Ionicons name="ios-refresh-circle" size={24} color={"green"} />
+          ),
+        }}
+      />
     </Drawer.Navigator>
   );
 };
@@ -94,6 +105,15 @@ const StackNavigator = () => {
           }}
         />
 
+        <RootStack.Screen
+          name="UserProfileUpdate"
+          component={UserProfileCreation}
+          options={{
+            title: "Profile",
+            headerShown: false,
+            headerTitleAlign: "center",
+          }}
+        />
         <RootStack.Screen
           name="UploadProfilePic"
           component={UploadProfilePic}
@@ -124,14 +144,36 @@ const StackNavigator = () => {
           name="FlightScreen"
           component={FlightScreen}
           options={{
-            headerShown: false,
+            headerShown: true,
+            title: "Flights",
+            headerTitleStyle: {
+              color: "white",
+              fontWeight: "bold",
+            },
+            headerTintColor: "#fff",
+            headerStyle: {
+              backgroundColor: colors.bgUnread,
+              borderBottomColor: colors.bgMain,
+              borderTopWidth: 1.8,
+            },
           }}
         />
         <RootStack.Screen
           name="DocumentsScreen"
           component={DocumentsScreen}
           options={{
-            headerShown: false,
+            headerShown: true,
+            title: "Documents",
+            headerTitleStyle: {
+              color: "white",
+              fontWeight: "bold",
+            },
+            headerTintColor: "#fff",
+            headerStyle: {
+              backgroundColor: colors.bgUnread,
+              borderBottomColor: colors.bgMain,
+              borderTopWidth: 1.8,
+            },
           }}
         />
 
@@ -139,7 +181,36 @@ const StackNavigator = () => {
           name="CertificatesScreen"
           component={CertificatesScreen}
           options={{
-            headerShown: false,
+            headerShown: true,
+            title: "Certificates",
+            headerTitleStyle: {
+              color: "white",
+              fontWeight: "bold",
+            },
+            headerTintColor: "#fff",
+            headerStyle: {
+              backgroundColor: colors.bgUnread,
+              borderBottomColor: colors.bgMain,
+              borderTopWidth: 1.8,
+            },
+          }}
+        />
+        <RootStack.Screen
+          name="TravelUpdateScreen"
+          component={TravelUpdateScreen}
+          options={{
+            headerShown: true,
+            title: "Travel Requirement",
+            headerTitleStyle: {
+              color: "white",
+              fontWeight: "bold",
+            },
+            headerTintColor: "#fff",
+            headerStyle: {
+              backgroundColor: colors.bgUnread,
+              borderBottomColor: colors.bgMain,
+              borderTopWidth: 1.8,
+            },
           }}
         />
         <RootStack.Screen
@@ -165,7 +236,18 @@ const StackNavigator = () => {
           name="FlightDetailsForm"
           component={FlightDetailsForm}
           options={{
-            headerShown: false,
+            headerShown: true,
+            title: "Flight Details",
+            headerTitleStyle: {
+              color: "white",
+              fontWeight: "bold",
+            },
+            headerTintColor: "#fff",
+            headerStyle: {
+              backgroundColor: colors.bgUnread,
+              borderBottomColor: colors.bgMain,
+              borderTopWidth: 1.8,
+            },
           }}
         />
         <RootStack.Screen

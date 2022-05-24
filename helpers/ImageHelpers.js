@@ -1,6 +1,8 @@
 import * as Permissions from "expo-permissions";
 import * as ImagePicker from "expo-image-picker";
 import { Platform } from "react-native";
+import { firebaseStorage, firebaseDatabase } from "../config/Config";
+import { ref, getDownloadURL, uploadBytes, uploadTask } from "firebase/storage";
 
 export const openImageLibrary = async () => {
   const { status } = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
@@ -63,4 +65,36 @@ export const prepareBlob = async (imageUri) => {
   });
 
   return blob;
+};
+
+export const checkProfileImage = async (uid) => {
+  var profileImageUrl = "https://bootdey.com/img/Content/avatar/avatar6.png";
+  const storageRef = ref(firebaseStorage, "profile/" + uid);
+
+  await getDownloadURL(storageRef)
+    .then((url) => {
+      profileImageUrl = url;
+    })
+    .catch((error) => {
+      // A full list of error codes is available at
+      // https://firebase.google.com/docs/storage/web/handle-errors
+      switch (error.code) {
+        case "storage/object-not-found":
+          // File doesn't exist
+          break;
+        case "storage/unauthorized":
+          // User doesn't have permission to access the object
+          break;
+        case "storage/canceled":
+          // User canceled the upload
+          break;
+
+        // ...
+
+        case "storage/unknown":
+          // Unknown error occurred, inspect the server response
+          break;
+      }
+    });
+  return profileImageUrl;
 };

@@ -48,7 +48,7 @@ class UploadProfilePic extends React.Component {
   uploadImage = async (image) => {
     const storageRef = ref(
       firebaseStorage,
-      "profile/" + this.props.route.params.user.uid
+      "profile/" + this.props.currentUser.user.uid
     );
     try {
       const blob = await ImageHelpers.prepareBlob(image.uri);
@@ -102,9 +102,10 @@ class UploadProfilePic extends React.Component {
   };
 
   checkProfileImage = () => {
+    console.log(this.props);
     const storageRef = ref(
       firebaseStorage,
-      "profile/" + this.props.route.params.user.uid
+      "profile/" + this.props.currentUser.user.uid
     );
     getDownloadURL(storageRef)
       .then((url) => {

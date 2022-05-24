@@ -11,12 +11,17 @@ import {
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import colors from "../assets/colors";
 import { Ionicons } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
+import { firebaseDatabase } from "../config/Config";
+import { ref, set, push } from "firebase/database";
 
-const FlightDetailsForm = () => {
+const FlightDetailsForm = (props) => {
+  const [fromFlight, setFromFlight] = useState("");
+  const [toFlight, setToFlight] = useState("");
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [arrivaldatePickerVisible, setArrivalDatePickerVisible] =
     useState(false);
-
+  const propsData = useSelector((state) => state);
   const showArrivalDatePicker = () => {
     setArrivalDatePickerVisible(true);
   };
@@ -81,121 +86,141 @@ const FlightDetailsForm = () => {
     return dateTimeString;
   };
 
+  const addFlightDtailsToDB = () => {
+    if (fromFlight) {
+      const flightRef = ref(
+        firebaseDatabase,
+        "Flights/" + propsData.auth.currentUser.user.uid
+      );
+      const newflightRef = push(flightRef);
+      set(newflightRef, {
+        fromFlight: fromFlight,
+        toFlight: toFlight,
+        departureDate: Formatted,
+        ArrivalDate: ArrivalFormatted,
+      });
+      props.navigation.navigate("FlightScreen");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <SafeAreaView />
-      <View
-        style={{
-          height: 70,
-          borderBottomColor: colors.borderColor,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-          Add Flight Details
-        </Text>
+      <View style={{ justifyContent: "space-around" }}>
+        <TextInput
+          placeholder="From"
+          style={styles.inputStyle}
+          value={fromFlight}
+          onChangeText={(newValue) => setFromFlight(newValue)}
+        />
+        <TextInput
+          placeholder="To"
+          style={styles.inputStyle}
+          value={toFlight}
+          onChangeText={(newValue) => setToFlight(newValue)}
+        />
       </View>
-      <View>
-        <View>
-          <TextInput placeholder="From" style={styles.inputStyle} />
-          <TextInput placeholder="To" style={styles.inputStyle} />
-          <View
-            style={{ flex: 1, flexDirection: "row", margin: 10, marginTop: 40 }}
-          >
-            <Text style={{ fontSize: 24, fontWeight: "bold", marginLeft: -10 }}>
-              Departure
-            </Text>
-            {isDepCalVisiable && (
-              <TouchableOpacity onPress={showDatePicker}>
-                <Ionicons
-                  name="calendar"
-                  size={50}
-                  color={"green"}
-                  style={{
-                    alignItems: "flex-end",
-                    justifyContent: "space-around",
-                    marginLeft: 10,
-                  }}
-                />
-              </TouchableOpacity>
-            )}
-            <Text
-              style={{
-                fontSize: 15,
-                fontWeight: "bold",
-                margin: 10,
-                marginLeft: 20,
-              }}
-            >
-              {Formatted ? Formatted : ""}
-            </Text>
-            <DateTimePickerModal
-              isVisible={datePickerVisible}
-              mode="datetime"
-              onConfirm={handleConfirm}
-              onCancel={hideDatePicker}
-            />
-          </View>
-
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              margin: 1,
-              marginTop: -490,
-            }}
-          >
-            <Text style={{ fontSize: 24, fontWeight: "bold" }}>Arrival</Text>
-            {isArrivalCalVisiable && (
-              <TouchableOpacity onPress={showArrivalDatePicker}>
-                <Ionicons
-                  name="calendar"
-                  size={50}
-                  color={"green"}
-                  style={{
-                    alignItems: "flex-end",
-                    justifyContent: "space-around",
-                    marginLeft: 40,
-                  }}
-                />
-              </TouchableOpacity>
-            )}
-            <Text
-              style={{
-                fontSize: 15,
-                fontWeight: "bold",
-                margin: 10,
-                marginLeft: 25,
-              }}
-            >
-              {ArrivalFormatted ? ArrivalFormatted : ""}
-            </Text>
-            <DateTimePickerModal
-              isVisible={arrivaldatePickerVisible}
-              mode="datetime"
-              onConfirm={handleArrivalConfirm}
-              onCancel={hideArrivalDatePicker}
-            />
-          </View>
-        </View>
-      </View>
-      <View>
-        <TouchableOpacity>
+      <View style={{ flex: 2, height: 400 }}>
+        <View
+          style={{
+            flex: 1,
+            color: "green",
+            flexDirection: "row",
+            justifyContent: "space-around",
+            marginTop: 20,
+          }}
+        >
+          <Text style={{ fontSize: 24, fontWeight: "bold", marginLeft: -10 }}>
+            Departure
+          </Text>
+          {isDepCalVisiable && (
+            <TouchableOpacity onPress={showDatePicker}>
+              <Ionicons
+                name="calendar"
+                size={50}
+                color={"green"}
+                style={{
+                  alignItems: "flex-end",
+                  justifyContent: "space-around",
+                  marginLeft: 10,
+                }}
+              />
+            </TouchableOpacity>
+          )}
           <Text
             style={{
-              fontSize: 24,
+              fontSize: 15,
               fontWeight: "bold",
-              fontWeight: "bold",
-              color: "white",
-              justifyContent: "center",
-              alignContent: "center",
-              marginTop: -400,
+              margin: 10,
+              marginLeft: 20,
             }}
           >
-            Add
+            {Formatted ? Formatted : ""}
           </Text>
-        </TouchableOpacity>
+          <DateTimePickerModal
+            isVisible={datePickerVisible}
+            mode="datetime"
+            onConfirm={handleConfirm}
+            onCancel={hideDatePicker}
+          />
+        </View>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+          }}
+        >
+          <Text style={{ fontSize: 24, fontWeight: "bold" }}>Arrival</Text>
+          {isArrivalCalVisiable && (
+            <TouchableOpacity onPress={showArrivalDatePicker}>
+              <Ionicons
+                name="calendar"
+                size={50}
+                color={"green"}
+                style={{
+                  alignItems: "flex-end",
+                  justifyContent: "space-around",
+                  marginLeft: 40,
+                }}
+              />
+            </TouchableOpacity>
+          )}
+          <Text
+            style={{
+              fontSize: 15,
+              fontWeight: "bold",
+              margin: 10,
+              marginLeft: 25,
+            }}
+          >
+            {ArrivalFormatted ? ArrivalFormatted : ""}
+          </Text>
+          <DateTimePickerModal
+            isVisible={arrivaldatePickerVisible}
+            mode="datetime"
+            onConfirm={handleArrivalConfirm}
+            onCancel={hideArrivalDatePicker}
+          />
+        </View>
+      </View>
+
+      <View style={{ flex: 1 }}>
+        <View>
+          <TouchableOpacity onPress={addFlightDtailsToDB}>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: "bold",
+                fontWeight: "bold",
+                color: "white",
+                justifyContent: "center",
+                alignContent: "center",
+              }}
+            >
+              Add
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

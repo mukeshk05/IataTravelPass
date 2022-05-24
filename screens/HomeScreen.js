@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
-import { ref, getDownloadURL, uploadBytes, uploadTask } from "firebase/storage";
 import { firebaseStorage, firebaseDatabase } from "../config/Config";
 const PrivacyImage = require("../assets/privacy.png");
 const DocumentImage = require("../assets/documents.png");
@@ -18,12 +17,19 @@ const TravelRuleImage = require("../assets/travelUpdate.png");
 const defaultProfileIMage = require("../assets/avatar.png");
 import { connect } from "react-redux";
 import { compose } from "redux";
+import { ref, set, get, child } from "firebase/database";
+import { Ionicons } from "@expo/vector-icons";
+import CountryFlag from "react-native-country-flag";
+import colors from "../assets/colors";
 
 class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       profileImage: null,
+      currentAddress: null,
+      userDisplayName: null,
+      currentContryCode: "US",
       data: [
         {
           id: 1,
@@ -54,48 +60,22 @@ class HomeScreen extends React.Component {
     };
   }
 
-  readUserData = () => {};
-
-  readProfilePic = () => {
-    const storageRef = ref(
-      firebaseStorage,
-      "profile/" + this.props.route.params.user.uid
-    );
-    getDownloadURL(storageRef)
-      .then((url) => {
-        this.setState({
-          profileImage: url,
-        });
-      })
-      .catch((error) => {
-        // A full list of error codes is available at
-        // https://firebase.google.com/docs/storage/web/handle-errors
-        switch (error.code) {
-          case "storage/object-not-found":
-            // File doesn't exist
-            break;
-          case "storage/unauthorized":
-            // User doesn't have permission to access the object
-            break;
-          case "storage/canceled":
-            // User canceled the upload
-            break;
-
-          // ...
-
-          case "storage/unknown":
-            // Unknown error occurred, inspect the server response
-            break;
-        }
-      });
+  componentDidMount = async () => {
+    await this.readUserData();
   };
 
-  componentDidMount = () => {
-    if (!this.props.profilePic) {
-      this.setState({
-        profileImage: "https://bootdey.com/img/Content/avatar/avatar6.png",
-      });
-    }
+  readUserData = async () => {
+    const dbRef = ref(firebaseDatabase);
+    await get(child(dbRef, `user/${this.props.currentUser.user.uid}`)).then(
+      (userData) => {
+        this.setState({
+          userDisplayName:
+            userData.val().firstName + "  " + userData.val().lastName,
+          currentAddress: userData.val().currentAddress,
+          currentContryCode: userData.val().currentContryCode,
+        });
+      }
+    );
   };
 
   clickEventListener(item) {
@@ -112,20 +92,25 @@ class HomeScreen extends React.Component {
     if (item.id == 4) {
       this.props.navigation.navigate("PrivacyScreen");
     }
+    if (item.id == 5) {
+      this.props.navigation.navigate("TravelUpdateScreen");
+    }
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <Image
-          style={styles.avatar}
-          source={{
-            uri: this.state.profileImage,
+        <Image style={styles.avatar} source={{ uri: this.props.profilePic }} />
+
+        <Text style={styles.name}>{this.state.userDisplayName}</Text>
+        <View
+          style={{
+            flex: 4,
+            flexDirection: "column",
+            height: 30,
+            width: 300,
           }}
-        />
-
-        <Text style={styles.name}>Jhon Smith</Text>
-
+        ></View>
         <View style={styles.bodyContent}>
           <FlatList
             style={styles.list}
@@ -158,6 +143,42 @@ class HomeScreen extends React.Component {
             }}
           />
         </View>
+        <View style={{ flex: 16 }}></View>
+        <View
+          style={{
+            flex: 2,
+            backgroundColor: colors.bgUnread,
+            justifyContent: "center",
+            height: 1,
+            alignContent: "center",
+            borderBottomWidth: 0.6,
+            borderTopWidth: 0.6,
+            flexDirection: "column",
+          }}
+        >
+          <Ionicons
+            name="location-sharp"
+            size={30}
+            color={"green"}
+            style={{ marginLeft: 60, marginTop: 15 }}
+          ></Ionicons>
+          {this.state.currentContryCode && (
+            <Text
+              style={{
+                marginLeft: 100,
+                fontWeight: "bold",
+                color: "white",
+                marginTop: -40,
+              }}
+            >
+              {this.state.currentAddress}{" "}
+              <CountryFlag
+                isoCode={`${this.state.currentContryCode}`}
+                size={25}
+              />
+            </Text>
+          )}
+        </View>
       </View>
     );
   }
@@ -174,7 +195,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     alignSelf: "center",
     position: "absolute",
-    marginTop: 260,
+    marginTop: 220,
   },
   avatar: {
     width: 130,
@@ -185,7 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: "center",
     position: "absolute",
-    marginTop: 80,
+    marginTop: 50,
   },
   name: {
     fontSize: 22,
@@ -194,7 +215,17 @@ const styles = StyleSheet.create({
     alignContent: "center",
     alignSelf: "center",
     position: "absolute",
-    marginTop: 218,
+    marginTop: 190,
+  },
+  address: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontWeight: "600",
+    alignContent: "center",
+    alignSelf: "center",
+    position: "absolute",
+    marginTop: 240,
+    marginLeft: 70,
   },
   list: {
     paddingHorizontal: 5,
@@ -266,6 +297,8 @@ const mapDispatchToProps = (dispatch) => {
   return {
     toggleIsLoadingProfilePic: (bool) =>
       dispatch({ type: "TOGGLE_IS_LOADING_PROFILE_PIC", payload: bool }),
+    uploadProfileImage: (profilePic) =>
+      dispatch({ type: "UPLOAD_PROFILE_IMAGE", payload: profilePic }),
   };
 };
 

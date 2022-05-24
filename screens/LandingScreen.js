@@ -12,7 +12,7 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import colors from "../assets/colors";
-
+import { checkProfileImage } from "../helpers/ImageHelpers";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -21,6 +21,7 @@ import { auth, firebaseDatabase } from "../config/Config";
 import { ref, set } from "firebase/database";
 import { user } from "firebase-functions/v1/auth";
 import { connect } from "react-redux";
+import { compose } from "redux";
 class WelcomeScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -38,6 +39,9 @@ class WelcomeScreen extends React.Component {
         .then((userCredential) => {
           this.setState({ isLoading: false });
           this.props.signIn(userCredential);
+          checkProfileImage(userCredential.user.uid).then((profileImageUrl) => {
+            this.props.uploadProfileImage(profileImageUrl);
+          });
           this.props.navigation.navigate("Loading");
           // ...
         })
@@ -69,9 +73,10 @@ class WelcomeScreen extends React.Component {
             email: userData.email,
             uid: userData.uid,
           });
+          this.props.signIn(userCredential);
           this.setState({ isLoading: false });
 
-          this.confirmNextScreen(userData);
+          this.props.navigation.navigate("UserProfileUpdate");
 
           // this.props.navigation.navigate("Loading");
           // ...
@@ -98,29 +103,6 @@ class WelcomeScreen extends React.Component {
     } else {
       alert("Please enter email and passowrd");
     }
-  };
-
-  confirmNextScreen = (userData) => {
-    Alert.alert("Profile Pic", "Do You Want to Upload Profile Pic", [
-      {
-        text: "Ask me later",
-        onPress: () => this.props.navigation.navigate("Loading"),
-      },
-      {
-        text: "Cancel",
-        onPress: () => this.props.navigation.navigate("Loading"),
-        style: "cancel",
-      },
-      {
-        text: "OK",
-        onPress: () => {
-          this.props.signIn(userData);
-          this.props.navigation.navigate("UploadProfilePic", {
-            user: userData,
-          });
-        },
-      },
-    ]);
   };
 
   render() {
@@ -303,6 +285,16 @@ const Styles = StyleSheet.create({
 const mapDispatchToProps = (dispatch) => {
   return {
     signIn: (user) => dispatch({ type: "SIGN_IN", payload: user }),
+    uploadProfileImage: (profilePic) =>
+      dispatch({ type: "UPLOAD_PROFILE_IMAGE", payload: profilePic }),
   };
 };
-export default connect(null, mapDispatchToProps)(WelcomeScreen);
+
+const mapStateToProps = (state) => {
+  return {
+    currentUser: state.auth.currentUser,
+    profilePic: state.auth.profilePic,
+  };
+};
+const wrapper = compose(connect(mapStateToProps, mapDispatchToProps));
+export default wrapper(WelcomeScreen);
