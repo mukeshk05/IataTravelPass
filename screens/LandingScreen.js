@@ -135,8 +135,8 @@ class WelcomeScreen extends React.Component {
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
-          <Ionicons name="ios-boat-sharp" size={150} color={"green"} />
-          <Text style={{ fontSize: 20 }}>IATA Travel Pass</Text>
+          <Ionicons name="ios-airplane-sharp" size={150} color={"green"} />
+          <Text style={{ fontSize: 20 }}>Passenger Travel Passport </Text>
         </View>
         <View
           style={{
